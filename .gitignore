@@ -3,8 +3,8 @@ wasm-build/
 native-build/
 dist/
 
-# WASM build output (committed separately or built locally)
-wasm-out/
+# WASM intermediate build (Emscripten working dir)
+wasm-build/
 
 # ROM files — exclude root-level and test/roms commercial ROMs
 *.nes
