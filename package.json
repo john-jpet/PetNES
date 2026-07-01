@@ -1,0 +1,18 @@
+{
+  "name": "petnes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:wasm && tsc --noEmit && vite build",
+    "build:wasm": "emcmake cmake -B wasm-build -DCMAKE_BUILD_TYPE=Release && cmake --build wasm-build -j4 && cp wasm-build/petnes-core.js wasm-out/ && cp wasm-build/petnes-core.wasm public/wasm/",
+    "build:native": "cmake -B native-build && cmake --build native-build -j4",
+    "test:nestest": "npm run build:native && ./native-build/nestest-runner test/roms/nestest.nes test/roms/nestest.log",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "vite": "^5.4.0"
+  }
+}

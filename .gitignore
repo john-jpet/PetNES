@@ -1,0 +1,27 @@
+node_modules/
+wasm-build/
+native-build/
+dist/
+
+# WASM build output (committed separately or built locally)
+wasm-out/
+
+# ROM files — exclude root-level and test/roms commercial ROMs
+*.nes
+*.NES
+# Re-include nestest (freely distributable accuracy test ROM)
+!test/roms/nestest.nes
+!test/roms/nestest.log
+
+# Save states and battery RAM
+*.sav
+*.state
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea/
+*.swp
