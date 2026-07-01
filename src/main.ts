@@ -334,8 +334,8 @@ document.addEventListener("fullscreenchange", () => {
   if (document.fullscreenElement === screenWrap) {
     requestAnimationFrame(() => {
       const vw = window.innerWidth, vh = window.innerHeight;
-      const scale = Math.min(vw / 768, vh / 720);
-      const w = Math.floor(768 * scale), h = Math.floor(720 * scale);
+      const scale = Math.min(vw / 512, vh / 480);
+      const w = Math.floor(512 * scale), h = Math.floor(480 * scale);
       canvas.style.width      = w + "px";
       canvas.style.height     = h + "px";
       canvas.style.marginLeft = Math.floor((vw - w) / 2) + "px";
