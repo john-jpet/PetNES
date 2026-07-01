@@ -98,7 +98,7 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       padding: 10px 20px 4px;
     }
     .tb-sep { flex: 1; }
@@ -395,9 +395,11 @@
       z-index: 1;
       position: relative;
     }
+    #toolbar button, #toolbar label.btn { padding: 3px 8px; }
+
     .speed-btn {
       font-size: 0.85rem;
-      padding: 2px 8px;
+      padding: 2px 6px;
       color: var(--text-dim);
       border-color: var(--text-dim);
     }
@@ -448,7 +450,6 @@
   <button id="btn-reset"      disabled>↺ RESET</button>
   <button id="btn-save"       disabled>💾 SAVE</button>
   <button id="btn-load-state" disabled>📂 LOAD</button>
-  <span style="color:var(--border);padding:0 2px">│</span>
   <button class="speed-btn" data-speed="0.5">½×</button>
   <button class="speed-btn active" data-speed="1">1×</button>
   <button class="speed-btn" data-speed="2">2×</button>
