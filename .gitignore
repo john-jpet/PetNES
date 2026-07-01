@@ -12,6 +12,7 @@ wasm-build/
 # Re-include nestest (freely distributable accuracy test ROM)
 !test/roms/nestest.nes
 !test/roms/nestest.log
+!public/wizard.nes
 
 # Save states and battery RAM
 *.sav

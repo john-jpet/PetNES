@@ -35,10 +35,11 @@ await library.open();
 
 // ── State ─────────────────────────────────────────────────────────────────
 let nes: Nes | null = null;
-let paused  = false;
-let romName = "";
-let romHash = "";
-let speed   = 1;
+let paused     = false;
+let romName    = "";
+let romHash    = "";
+let wizardHash = "";
+let speed      = 1;
 
 // ── Audio ─────────────────────────────────────────────────────────────────
 let audioCtx:    AudioContext     | null = null;
@@ -212,30 +213,79 @@ window.addEventListener("drop", async (e) => {
 });
 
 // ── ROM Library UI ────────────────────────────────────────────────────────
-async function renderLibrary(): Promise<void> {
-  const entries = await library.getAll();
-  libraryEmpty.style.display = entries.length ? "none" : "block";
-  libraryGrid.innerHTML = "";
-  for (const e of entries) {
-    const card = document.createElement("div");
+function makeLibCard(e: { hash: string; name: string; thumbnail: string }, featured: boolean): HTMLDivElement {
+  const card = document.createElement("div");
+  if (featured) {
+    card.className = "lib-card featured";
+    card.innerHTML = `
+      <img src="${e.thumbnail}" alt="${e.name}">
+      <div class="lib-card-info">
+        <div class="lib-card-badge">★ FEATURED</div>
+        <div class="lib-card-title">${e.name.toUpperCase()}</div>
+        <div class="lib-card-sub">NES HOMEBREW</div>
+      </div>`;
+  } else {
     card.className = "lib-card";
     card.innerHTML = `
       <img src="${e.thumbnail}" alt="${e.name}">
       <div class="lib-card-name">${e.name}</div>
       <button class="lib-card-del" title="Remove">✕</button>`;
-    card.querySelector("img")!.addEventListener("click", async () => {
-      const data = await library.getData(e.hash);
-      if (data) { closeSettings(); await loadRom(data, e.name, true); await library.updateLastPlayed(e.hash); }
-    });
     card.querySelector(".lib-card-del")!.addEventListener("click", async (ev) => {
       ev.stopPropagation();
       await library.remove(e.hash);
-      renderLibrary();
+      void renderLibrary();
     });
-    libraryGrid.appendChild(card);
+  }
+  card.querySelector("img")!.addEventListener("click", async () => {
+    const data = await library.getData(e.hash);
+    if (data) { await loadRom(data, e.name + ".nes", true); await library.updateLastPlayed(e.hash); }
+  });
+  return card;
+}
+
+async function renderLibrary(): Promise<void> {
+  const entries = await library.getAll();
+  libraryEmpty.style.display = entries.length ? "none" : "block";
+  libraryGrid.innerHTML = "";
+  const featured = entries.find(e => e.hash === wizardHash);
+  if (featured) libraryGrid.appendChild(makeLibCard(featured, true));
+  for (const e of entries) {
+    if (e.hash !== wizardHash) libraryGrid.appendChild(makeLibCard(e, false));
   }
 }
-renderLibrary();
+
+async function seedWizard(): Promise<void> {
+  try {
+    const res = await fetch("/wizard.nes");
+    if (!res.ok) return;
+    const data = new Uint8Array(await res.arrayBuffer());
+    wizardHash = hashRom(data);
+    if (!await library.has(wizardHash)) {
+      const tmpNes = new Nes(data);
+      // Boot to title, press Start, wait for gameplay
+      for (let i = 0; i < 30; i++) tmpNes.stepFrame();
+      tmpNes.controller1.setButton(3, true);   // Start down
+      for (let i = 0; i < 5; i++) tmpNes.stepFrame();
+      tmpNes.controller1.setButton(3, false);  // Start up
+      for (let i = 0; i < 150; i++) tmpNes.stepFrame();
+      const fb = tmpNes.framebuffer;
+      const offscreen = document.createElement("canvas");
+      offscreen.width = 256; offscreen.height = 240;
+      const ctx2d = offscreen.getContext("2d")!;
+      const rgba = new Uint8ClampedArray(fb.buffer, fb.byteOffset, 256 * 240 * 4);
+      ctx2d.putImageData(new ImageData(rgba, 256, 240), 0, 0);
+      const thumb = offscreen.toDataURL("image/png");
+      tmpNes.destroy();
+      await library.save(wizardHash, "Wizard's Stand", 0, data, thumb);
+    }
+  } catch (err) {
+    console.warn("Could not seed wizard.nes:", err);
+  }
+  void renderLibrary();
+}
+
+void renderLibrary();
+void seedWizard();
 
 // ── Save states ───────────────────────────────────────────────────────────
 function saveState(): void {
